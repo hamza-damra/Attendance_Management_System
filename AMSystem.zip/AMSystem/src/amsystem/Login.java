@@ -4,7 +4,9 @@
  */
 package amsystem;
 
-import javax.swing.JOptionPane;
+import java.sql.*;
+import java.util.logging.*;
+import javax.swing.*;
 
 /**
  *
@@ -18,6 +20,7 @@ public class Login extends javax.swing.JFrame {
     public Login() {
         initComponents();
         this.setResizable(false);
+        this.setLocationRelativeTo(null);
         
     }
 
@@ -188,7 +191,8 @@ public class Login extends javax.swing.JFrame {
     }//GEN-LAST:event_btnCancelActionPerformed
 
     private void btnLoginActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLoginActionPerformed
-       if(txtUser.getText().trim().isEmpty())  
+
+        if(txtUser.getText().trim().isEmpty())  
        {
            JOptionPane.showMessageDialog(this, "Please Enter UserName");
            txtUser.setText("");
@@ -199,11 +203,34 @@ public class Login extends javax.swing.JFrame {
            JOptionPane.showMessageDialog(this, "Please Enter Password");
            txtPass.setText("");
            txtPass.grabFocus();
+           //
        }else
        {
-           AddStudent std = new AddStudent();
-        std.setVisible(true);
+
+        
+            try {
+                Class.forName("com.mysql.cj.jdbc.Driver");
+                Connection con = DriverManager.getConnection("jdbc:mysql://localhost/attendence_ms","root","");
+                PreparedStatement ps = con.prepareStatement("SELECT * FROM `users` WHERE `uname`=? AND `pass`=?");
+                ps.setString(1, txtUser.getText());
+                ps.setString(2, txtPass.getText());
+                ResultSet rs = ps.executeQuery();
+                if(rs.next())
+                {
+                    AddStudent std = new AddStudent();
+                    std.setVisible(true);
+                    std.pack();
+                   std.setLocationRelativeTo(null);
+                    this.dispose();
+                }else
+                {
+                     JOptionPane.showMessageDialog(this, "Wrong Username OR Password","Login error",2);
+                }
+            } catch (ClassNotFoundException | SQLException ex) {
+                Logger.getLogger(Login.class.getName()).log(Level.SEVERE, null, ex);
+            }
        }
+       
     }//GEN-LAST:event_btnLoginActionPerformed
 
     private void txtPassActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtPassActionPerformed
